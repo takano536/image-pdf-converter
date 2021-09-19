@@ -7,7 +7,7 @@
 ```
 ImagePdfConverter.exe --help
 ```
-以下のコマンドは、プレイリストを作成するコマンドの一例です。
+以下のコマンドは、PDFを作成するコマンドの一例です。
 ```
 ImagePdfConverter.exe C:\Users\user\Pictures\images --output_name img.pdf
 ```
