@@ -53,6 +53,12 @@ parser.add_argument(
     action='store_true',
     help='recursively get input files'
 )
+parser.add_argument(
+    '-q', '--quality',
+    type=int,
+    default=95,
+    help='quality when converting png format to jpg format (default=95)'
+)
 args = parser.parse_args()
 if args.exclude is None:
     args.exclude = []
@@ -228,13 +234,16 @@ def preview(filepaths: list, output_filepath: str):
         pre_dirpath = dirpath
 
         if not is_image(filepath):
-            print('page', print_format.format(cnt), ':', filename, '   Error: It is not an image file')
+            print('page', print_format.format(cnt), ':', filename, '   Warning: It is not an image file')
             should_proceed = False
+        ext = os.path.splitext(filename)[-1].lower()
+        if ext == '.png':
+            print('page', print_format.format(cnt), ':', filename, '   Warning: PNG format file')
         else:
             print('page', print_format.format(cnt), ':', filename)
     print('output folder ->', os.path.split(output_filepath)[0])
     if re.search(INVALID_CHAR_REGEX, os.path.split(output_filepath)[-1]):
-        print('output name ->', os.path.split(output_filepath)[-1], '   Error: Contains invalid characters')
+        print('output name ->', os.path.split(output_filepath)[-1], '   Warning: Contains invalid characters')
         should_proceed = False
     else:
         print('output name ->', os.path.split(output_filepath)[-1])
@@ -242,14 +251,36 @@ def preview(filepaths: list, output_filepath: str):
     return should_proceed
 
 
-def convert_image_into_pdf(filepaths: list, output_filepath: str):
+def convert_png_into_jpg(filepath: str):
+    dirpath, filename = os.path.split(filepath)
+    filename_without_ext = os.path.splitext(filename)[0]
+    save_filepath = duplicate_rename(os.path.join(dirpath, filename_without_ext) + '.jpg')
+    img = Image.open(filepath)
+    img = img.convert('RGB')  # アルファチャンネルの削除
+    img.save(save_filepath, 'JPEG', quality=args.quality)
+    return save_filepath
+
+
+def convert_images_into_pdf(filepaths: list, output_filepath: str):
+    temp_filepaths = list()
+    for i in range(len(filepaths)):
+        _, filename = os.path.split(filepaths[i])
+        ext = os.path.splitext(filename)[-1].lower()
+        if ext == '.png':
+            filepaths[i] = convert_png_into_jpg(filepaths[i])
+            temp_filepaths.append(filepaths[i])
+
     with open(output_filepath, "wb") as f:
         try:
-            f.write(img2pdf.convert([Image.open(file_path).filename for file_path in filepaths if is_image(file_path)]))
+            f.write(img2pdf.convert([Image.open(filepath).filename for filepath in filepaths]))  # リスト内包表記じゃないとうまくいかんかった
         except Exception as error:
             print(error)
             print("Error: An unexpected error has occurred...")
+            os.remove(output_filepath)
             return -1
+
+    for filepath in temp_filepaths:
+        os.remove(filepath)
     return 0
 
 
@@ -281,7 +312,7 @@ def main():
     if not should_proceed:
         return
 
-    ret = convert_image_into_pdf(sorted_filepaths, output_filepath)
+    ret = convert_images_into_pdf(sorted_filepaths, output_filepath)
     if ret == 0:
         print('PDF has been created successfully')
     else:

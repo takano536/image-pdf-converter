@@ -1,5 +1,5 @@
 # image-pdf-converter
-本ツールは、画像ファイルをPDFにまとめるツールです。画像には一切手を加えません。  
+本ツールは、画像ファイルをPDFにまとめるツールです。  
 [releasesページ](https://github.com/takano536/image-pdf-converter/releases)からダウンロードすることができます。
 
 ## 使い方
@@ -29,9 +29,9 @@ Press enter key to quit...
 ```
 引数を何も指定せずに実行すると、利用可能なオプションが表示されます。
 ```
-usage: ImagePdfConverter.exe [-h] [-o OUTPUT_FILENAME] [--output_folder OUTPUT_FOLDER] [-e [EXCLUDE [EXCLUDE ...]]]
-                             [--sort {folder,file,date,ext,file-desc,folder-desc,date-desc,ext-desc}] [-r]
-                             [input [input ...]]
+usage: main.py [-h] [-o OUTPUT_FILENAME] [--output_folder OUTPUT_FOLDER] [-e [EXCLUDE [EXCLUDE ...]]]
+               [--sort {folder,file,date,ext,file-desc,folder-desc,date-desc,ext-desc}] [-r] [-q QUALITY]
+               [input [input ...]]
 
 positional arguments:
   input                 input file or directory
@@ -48,10 +48,10 @@ optional arguments:
   --sort {folder,file,date,ext,file-desc,folder-desc,date-desc,ext-desc}
                         how to sort files (default=folder)
   -r, --recursive       recursively get input files
+  -q QUALITY, --quality QUALITY
+                        quality when converting png format to jpg format (default=95)
 
 error: the following arguments are required: input
-
-Press enter key to quit...
 ```
 
 ## コマンドラインオプション
@@ -99,6 +99,16 @@ Press enter key to quit...
 -r, --recursive
 このオプションを指定すると、サブフォルダを含めた全てのファイルを取得します。
 ```
+#### PNG形式のファイルをJPG形式のファイルに変換するときの品質
+```
+-q, --quality
+PNG形式のファイルをJPG形式のファイルに変換するときの品質を指定します。
+0から100の値を指定できます。デフォルト値は95です。
+```
+
+## 注意
+`PNG`形式のファイルは、`JPG`形式のファイルとしてPDFファイルに保存されます。  
+`WEBP`形式のファイルには対応していません。
 
 ## ライセンス
 本ソフトは無保証です。詳しくは[LICENSE](LICENSE)をご覧ください。
